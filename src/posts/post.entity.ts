@@ -67,7 +67,9 @@ export class Post {
     tags?: string[];
 
     // OneToOne relation with MetaOption (Uni-directional)
-    @OneToOne(() => MetaOption)
+    @OneToOne(() => MetaOption, {
+        cascade: true
+    })
     @JoinColumn()
     metaOptions?: MetaOption;
 }
