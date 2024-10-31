@@ -46,11 +46,12 @@ export class UsersService {
     /**
      * The method to get One User.
      */
-    public findOne(id: number) {
-        return {
-            id,
-            name: 'John Doe',
-            email: 'johndoe@gmail.com'
-        }
+    public async findOne(id: number) {
+
+        let user = await this.userRepository.findOne({
+            where: { id }
+        });
+
+        return user;
     }
 }

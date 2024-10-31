@@ -1,6 +1,7 @@
 import { MetaOption } from "src/meta-options/meta-option.entity";
+import { Tag } from "src/tags/tag.entity";
 import { User } from "src/users/user.entity";
-import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PostStatus } from "./enums/postStatus.enum";
 import { PostType } from "./enums/postType.enum";
 
@@ -75,7 +76,15 @@ export class Post {
     )
     author: User;
 
-    tags?: string[];
+    // ManyToMany relation with Tag (Uni-directional)
+    @ManyToMany(
+        () => Tag,
+        {
+            eager: true
+        }
+    )
+    @JoinTable()
+    tags?: Tag[];
 
     // OneToOne relation with MetaOption (Bi-directional)
     @OneToOne(
