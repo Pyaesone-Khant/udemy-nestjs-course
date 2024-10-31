@@ -19,9 +19,7 @@ export class PostsService {
     ) { }
 
     public findAll() {
-        return this.postRepository.find({
-            relations: ['metaOptions']
-        });
+        return this.postRepository.find();
     }
 
     public getPostsByUser(userId: number) {
