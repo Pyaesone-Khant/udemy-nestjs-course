@@ -79,6 +79,7 @@ export class Post {
     // ManyToMany relation with Tag (Uni-directional)
     @ManyToMany(
         () => Tag,
+        (tag) => tag.posts,
         {
             eager: true
         }
