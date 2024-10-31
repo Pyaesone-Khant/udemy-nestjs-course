@@ -8,19 +8,23 @@ import { PostsService } from './posts.service';
 export class PostsController {
     constructor(private readonly postsService: PostsService) { }
 
+    @Get()
+    public findAll() {
+        return this.postsService.findAll();
+    }
+
     @Get(":userId")
     getPosts(@Param("userId", ParseIntPipe) userId: number) {
         return this.postsService.getPostsByUser(userId);
     }
-
 
     @ApiResponse({
         status: 201,
         description: 'The record has been successfully created.',
     })
     @Post()
-    create(@Body() request: CreatePostDto) {
-        return this.postsService.createPost(request);
+    create(@Body() createPostDto: CreatePostDto) {
+        return this.postsService.create(createPostDto);
     }
 
     @ApiResponse({
