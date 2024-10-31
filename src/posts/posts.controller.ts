@@ -31,9 +31,9 @@ export class PostsController {
         status: 200,
         description: 'The record has been successfully updated.',
     })
-    @Patch()
-    update(@Body() request: PatchPostDto) {
-        return this.postsService.updatePost(request);
+    @Patch(":id")
+    update(@Param('id', ParseIntPipe) id: number, @Body() patchPostDto: PatchPostDto) {
+        return this.postsService.update(id, patchPostDto);
     }
 
     @Delete(':id')

@@ -48,8 +48,31 @@ export class PostsService {
         return await this.postRepository.save(post)
     }
 
-    public updatePost(request: PatchPostDto) {
-        return request;
+    public async update(id: number, patchPostDto: PatchPostDto) {
+        let tags = await this.tagsService.findMultipleTags(patchPostDto.tags);
+        let post = await this.postRepository.findOne({
+            where: { id }
+        })
+
+        if (!post) {
+            return {
+                success: false,
+                message: `Post with ID ${id} not found!`
+            }
+        }
+
+        post.title = patchPostDto.title ?? post.title;
+        post.content = patchPostDto.content ?? post.content;
+        post.status = patchPostDto.status ?? post.status;
+        post.postType = patchPostDto.postType ?? post.postType;
+        post.slug = patchPostDto.slug ?? post.slug;
+        post.publishOn = patchPostDto.publishOn ?? post.publishOn;
+        post.featuredImageUrl = patchPostDto.featuredImageUrl ?? post.featuredImageUrl;
+
+        // Update the tags
+        post.tags = tags;
+
+        return await this.postRepository.save(post);
     }
 
     public async delete(id: number) {
