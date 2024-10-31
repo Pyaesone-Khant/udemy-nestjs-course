@@ -48,4 +48,12 @@ export class PostsService {
     public updatePost(request: PatchPostDto) {
         return request;
     }
+
+    public async delete(id: number) {
+        await this.postRepository.delete(id);
+        return {
+            success: true,
+            message: `Post with ID ${id} has been deleted!`
+        }
+    }
 }
