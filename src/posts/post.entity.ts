@@ -1,5 +1,6 @@
 import { MetaOption } from "src/meta-options/meta-option.entity";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PostStatus } from "./enums/postStatus.enum";
 import { PostType } from "./enums/postType.enum";
 
@@ -63,6 +64,16 @@ export class Post {
         nullable: true
     })
     publishOn?: Date;
+
+    @ManyToOne(
+        () => User,
+        (user) => user.posts,
+        {
+            cascade: true,
+            eager: true
+        }
+    )
+    author: User;
 
     tags?: string[];
 
