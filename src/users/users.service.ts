@@ -1,7 +1,9 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/providers/auth.service';
 import { Repository } from 'typeorm';
+import profileConfig from './config/profile.config';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { User } from './user.entity';
 
@@ -18,8 +20,21 @@ export class UsersService {
         @Inject(forwardRef(() => AuthService))
         private readonly authService: AuthService,
         @InjectRepository(User)
-        private readonly userRepository: Repository<User>
+        private readonly userRepository: Repository<User>,
+        @Inject(profileConfig.KEY)
+        private readonly profileConfiguration: ConfigType<typeof profileConfig>
     ) { }
+
+    /**
+     * The method to get all Users.
+     */
+    public async findAll() {
+
+        return this.profileConfiguration;
+
+        let users = await this.userRepository.find();
+        return users;
+    }
 
     /**
      * The method to create a new User.
