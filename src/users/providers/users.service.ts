@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { CreateManyUsersDto } from '../dtos/create-many-users.dto';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { User } from '../user.entity';
+import { CreateUserProvider } from './create-user.provider';
+import { FindUserByEmailProvider } from './find-user-by-email.provider';
 import { UsersCreateManyProvider } from './users-create-many.provider';
 
 /**
@@ -28,6 +30,16 @@ export class UsersService {
         private readonly usersCreateManyProvider: UsersCreateManyProvider,
 
         /**
+         * inject createUserProvider
+         */
+        private readonly createUserProvider: CreateUserProvider,
+
+        /**
+         * Inject findUserByEmailProvider
+         */
+        private readonly findUserByEmailProvider: FindUserByEmailProvider
+
+        /**
          * specific custom config file for user service
          */
         // @Inject(profileConfig.KEY)
@@ -38,19 +50,6 @@ export class UsersService {
      * The method to get all Users.
      */
     public async findAll(limit: number, page: number) {
-
-        // custom exception using HttpException
-        // throw new HttpException(
-        //     {
-        //         status: HttpStatus.MOVED_PERMANENTLY,
-        //         error: 'The API endpoint does not exist',
-        //     },
-        //     HttpStatus.MOVED_PERMANENTLY,
-        //     {
-        //         description: 'The API endpoint does not exist'
-        //     }
-        // )
-
         let users = await this.userRepository.find();
         return users;
     }
@@ -59,46 +58,7 @@ export class UsersService {
      * The method to create a new User.
      */
     public async create(createUserDto: CreateUserDto) {
-
-        let existingUser = undefined;
-
-        try {
-            // check if user exists or not
-            existingUser = await this.userRepository.findOne({
-                where: {
-                    email: createUserDto.email
-                }
-            })
-        } catch (error) {
-            throw new RequestTimeoutException(
-                'Unable to process your request at the moment, please try again later!',
-                {
-                    description: 'Error connecting to database!'
-                }
-            )
-        }
-
-        // if user exists, throw error (Handle exception)
-        if (existingUser) {
-            throw new BadRequestException(
-                'User with this email already exists!',
-            )
-        }
-
-        // create user
-        let newUser = this.userRepository.create(createUserDto)
-        try {
-            newUser = await this.userRepository.save(newUser)
-        } catch (error) {
-            throw new RequestTimeoutException(
-                'Unable to process your request at the moment, please try again later!',
-                {
-                    description: 'Error connecting to database!'
-                }
-            )
-        }
-
-        return newUser;
+        return await this.createUserProvider.create(createUserDto)
     }
 
     /**
@@ -136,5 +96,12 @@ export class UsersService {
     public async createMany(createManyUsersDto: CreateManyUsersDto) {
         let newUsers = await this.usersCreateManyProvider.createMany(createManyUsersDto)
         return newUsers;
+    }
+
+    /**
+     * The method to find user by email
+     */
+    public async findOneByEmail(email: string) {
+        return this.findUserByEmailProvider.findOneByEmail(email)
     }
 }
