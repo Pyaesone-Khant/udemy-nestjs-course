@@ -1,6 +1,8 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
+import { PaginationQueryDto } from 'src/common/pagination/dtos/pagination-query.dto';
 import { CreatePostDto } from './dtos/create-post.dto';
+import { GetPostsDto } from './dtos/get-posts.dto';
 import { PatchPostDto } from './dtos/patch-post.dto';
 import { PostsService } from './posts.service';
 
@@ -9,12 +11,17 @@ export class PostsController {
     constructor(private readonly postsService: PostsService) { }
 
     @Get()
-    public findAll() {
-        return this.postsService.findAll();
+    public findAll(
+        @Query() paginationQueryDto: PaginationQueryDto
+    ) {
+        return this.postsService.findAll(paginationQueryDto);
     }
 
     @Get(":userId")
-    getPosts(@Param("userId", ParseIntPipe) userId: number) {
+    getPosts(
+        @Param("userId") userId: number,
+        @Query() postQuery: GetPostsDto
+    ) {
         return this.postsService.getPostsByUser(userId);
     }
 
