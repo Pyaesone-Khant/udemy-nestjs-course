@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TagsService } from 'src/tags/providers/tags.service';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { PatchPostDto } from './dtos/patch-post.dto';

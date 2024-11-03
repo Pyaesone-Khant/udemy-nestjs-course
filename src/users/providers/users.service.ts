@@ -1,9 +1,11 @@
-import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/providers/auth.service';
-import { DataSource, Repository } from 'typeorm';
-import { CreateUserDto } from './dtos/create-user.dto';
-import { User } from './user.entity';
+import { Repository } from 'typeorm';
+import { CreateManyUsersDto } from '../dtos/create-many-users.dto';
+import { CreateUserDto } from '../dtos/create-user.dto';
+import { User } from '../user.entity';
+import { UsersCreateManyProvider } from './users-create-many.provider';
 
 /**
  * Class to connect to the database and perform CRUD operations on the users table.
@@ -19,7 +21,11 @@ export class UsersService {
         private readonly authService: AuthService,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-        private readonly dataSource: DataSource
+
+        /**
+         * Inject usersCreateManyProvider
+         */
+        private readonly usersCreateManyProvider: UsersCreateManyProvider,
 
         /**
          * specific custom config file for user service
@@ -34,16 +40,16 @@ export class UsersService {
     public async findAll(limit: number, page: number) {
 
         // custom exception using HttpException
-        throw new HttpException(
-            {
-                status: HttpStatus.MOVED_PERMANENTLY,
-                error: 'The API endpoint does not exist',
-            },
-            HttpStatus.MOVED_PERMANENTLY,
-            {
-                description: 'The API endpoint does not exist'
-            }
-        )
+        // throw new HttpException(
+        //     {
+        //         status: HttpStatus.MOVED_PERMANENTLY,
+        //         error: 'The API endpoint does not exist',
+        //     },
+        //     HttpStatus.MOVED_PERMANENTLY,
+        //     {
+        //         description: 'The API endpoint does not exist'
+        //     }
+        // )
 
         let users = await this.userRepository.find();
         return users;
@@ -125,39 +131,10 @@ export class UsersService {
     }
 
     /**
-     * The method to create multiple users.
-     * Used transaction => if success then commit/finish operation, if not success then rollback the whole operation
+     * Ths method to create multiple users.
      */
-    public async createMany(createUsersData: CreateUserDto[]) {
-
-        let newUsers: User[] = [];
-
-        // create Query Runner Instance => to create transaction
-        const queryRunner = this.dataSource.createQueryRunner();
-
-        // connect Query Runner to dataSource
-        await queryRunner.connect();
-
-        // start transaction
-        await queryRunner.startTransaction();
-
-        try {
-            for (let user of createUsersData) {
-                let newUser = queryRunner.manager.create(User, user)
-                newUser = await queryRunner.manager.save(newUser);
-                newUsers.push(newUser);
-            }
-
-            // if success, commit 
-            await queryRunner.commitTransaction();
-        } catch (error) {
-            // if not success, rollback
-            await queryRunner.rollbackTransaction();
-        } finally {
-            // release connection
-            await queryRunner.release()
-        }
-
+    public async createMany(createManyUsersDto: CreateManyUsersDto) {
+        let newUsers = await this.usersCreateManyProvider.createMany(createManyUsersDto)
         return newUsers;
     }
 }
