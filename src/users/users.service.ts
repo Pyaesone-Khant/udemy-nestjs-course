@@ -1,7 +1,7 @@
 import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/providers/auth.service';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { User } from './user.entity';
 
@@ -19,6 +19,7 @@ export class UsersService {
         private readonly authService: AuthService,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        private readonly dataSource: DataSource
 
         /**
          * specific custom config file for user service
@@ -121,5 +122,42 @@ export class UsersService {
         }
 
         return user;
+    }
+
+    /**
+     * The method to create multiple users.
+     * Used transaction => if success then commit/finish operation, if not success then rollback the whole operation
+     */
+    public async createMany(createUsersData: CreateUserDto[]) {
+
+        let newUsers: User[] = [];
+
+        // create Query Runner Instance => to create transaction
+        const queryRunner = this.dataSource.createQueryRunner();
+
+        // connect Query Runner to dataSource
+        await queryRunner.connect();
+
+        // start transaction
+        await queryRunner.startTransaction();
+
+        try {
+            for (let user of createUsersData) {
+                let newUser = queryRunner.manager.create(User, user)
+                newUser = await queryRunner.manager.save(newUser);
+                newUsers.push(newUser);
+            }
+
+            // if success, commit 
+            await queryRunner.commitTransaction();
+        } catch (error) {
+            // if not success, rollback
+            await queryRunner.rollbackTransaction();
+        } finally {
+            // release connection
+            await queryRunner.release()
+        }
+
+        return newUsers;
     }
 }
