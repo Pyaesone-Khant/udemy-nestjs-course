@@ -32,7 +32,7 @@ export class UsersController {
         @Query('limit', new DefaultValuePipe(10)) limit: number,
         @Query('page', new DefaultValuePipe(1)) page: number
     ) {
-        return this.usersService.findAll()
+        return this.usersService.findAll(limit, page)
     }
 
     @Get(":id?")

@@ -1,4 +1,4 @@
-import { BadRequestException, forwardRef, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
+import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/providers/auth.service';
 import { Repository } from 'typeorm';
@@ -30,7 +30,19 @@ export class UsersService {
     /**
      * The method to get all Users.
      */
-    public async findAll() {
+    public async findAll(limit: number, page: number) {
+
+        // custom exception using HttpException
+        throw new HttpException(
+            {
+                status: HttpStatus.MOVED_PERMANENTLY,
+                error: 'The API endpoint does not exist',
+            },
+            HttpStatus.MOVED_PERMANENTLY,
+            {
+                description: 'The API endpoint does not exist'
+            }
+        )
 
         let users = await this.userRepository.find();
         return users;
