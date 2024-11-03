@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TagsService } from 'src/tags/providers/tags.service';
 import { UsersService } from 'src/users/users.service';
@@ -17,8 +17,15 @@ export class PostsService {
         private readonly tagsService: TagsService
     ) { }
 
-    public findAll() {
-        return this.postRepository.find();
+    public async findAll() {
+        let posts = undefined;
+        try {
+            posts = await this.postRepository.find();
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
+
+        return posts;
     }
 
     public getPostsByUser(userId: number) {
@@ -39,26 +46,52 @@ export class PostsService {
     }
 
     public async create(createPostDto: CreatePostDto) {
+        let post = undefined;
+
         let author = await this.usersService.findOne(createPostDto.authorId);
 
         let tags = await this.tagsService.findMultipleTags(createPostDto.tags)
 
-        let post = this.postRepository.create({ ...createPostDto, author, tags });
+        try {
+            post = this.postRepository.create({ ...createPostDto, author, tags });
+            await this.postRepository.save(post)
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
 
-        return await this.postRepository.save(post)
+        return post;
     }
 
     public async update(id: number, patchPostDto: PatchPostDto) {
-        let tags = await this.tagsService.findMultipleTags(patchPostDto.tags);
-        let post = await this.postRepository.findOne({
-            where: { id }
-        })
+
+        let tags = undefined;
+        let post = undefined
+
+        try {
+            tags = await this.tagsService.findMultipleTags(patchPostDto.tags);
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
+
+        if (!tags || tags?.length !== patchPostDto?.tags?.length) {
+            throw new BadRequestException(
+                'Invalid Tag!',
+                {
+                    description: 'One or more tags are invalid!'
+                }
+            )
+        }
+
+        try {
+            post = await this.postRepository.findOne({
+                where: { id }
+            })
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
 
         if (!post) {
-            return {
-                success: false,
-                message: `Post with ID ${id} not found!`
-            }
+            throw new BadRequestException('Post not found!')
         }
 
         post.title = patchPostDto.title ?? post.title;
@@ -72,11 +105,38 @@ export class PostsService {
         // Update the tags
         post.tags = tags;
 
-        return await this.postRepository.save(post);
+        try {
+            await this.postRepository.save(post);
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
+
+        return post
+    }
+
+    public async findOne(id: number) {
+        let post = undefined;
+
+        try {
+            post = await this.postRepository.findOne({
+                where: { id }
+            })
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
+
+        if (!post) {
+            throw new BadRequestException('Post not found!')
+        }
+
+        return post;
     }
 
     public async delete(id: number) {
+        await this.findOne(id);
+
         await this.postRepository.delete(id);
+
         return {
             success: true,
             message: `Post with ID ${id} has been deleted!`

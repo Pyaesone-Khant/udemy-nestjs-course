@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { CreateTagDto } from '../dtos/create-tag.dto';
@@ -12,31 +12,74 @@ export class TagsService {
     ) { }
 
     public async findAll(): Promise<Tag[]> {
-        return this.tagRepository.find();
+        let tags = undefined;
+        try {
+            tags = await this.tagRepository.find();
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
+
+        return tags;
     }
 
     public async create(createTagDto: CreateTagDto): Promise<Tag> {
-        let tag = this.tagRepository.create(createTagDto)
+        let tag = undefined;
 
-        return this.tagRepository.save(tag);
+        try {
+            tag = this.tagRepository.create(createTagDto)
+            await this.tagRepository.save(tag);
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
+
+        return tag;
     }
 
     public async findOne(id: number): Promise<Tag> {
-        return this.tagRepository.findOne({
-            where: { id }
-        });
+
+        let tag = undefined;
+
+        try {
+            tag = this.tagRepository.findOne({
+                where: { id }
+            });
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        };
+
+        if (!tag) {
+            throw new BadRequestException('Tag not found!')
+        };
+
+        return tag;
     }
 
     public async findMultipleTags(ids: number[]): Promise<Tag[]> {
-        return await this.tagRepository.find({
-            where: {
-                id: In(ids)
-            }
-        });
+
+        let tags = undefined;
+
+        try {
+            tags = await this.tagRepository.find({
+                where: {
+                    id: In(ids)
+                }
+            });
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
+
+        return tags;
     }
 
     public async delete(id: number) {
-        await this.tagRepository.delete(id);
+
+        await this.findOne(id)
+
+        try {
+            await this.tagRepository.delete(id);
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
 
         return {
             success: true,
@@ -45,7 +88,14 @@ export class TagsService {
     }
 
     public async softDelete(id: number) {
-        await this.tagRepository.softDelete(id);
+
+        await this.findOne(id)
+
+        try {
+            await this.tagRepository.softDelete(id);
+        } catch (error) {
+            throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
+        }
 
         return {
             success: true,
