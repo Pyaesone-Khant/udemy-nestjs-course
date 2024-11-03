@@ -1,5 +1,8 @@
 import { forwardRef, Inject, Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/providers/users.service';
+import jwtConfig from '../config/jwt.config';
 import { SignInDto } from '../dtos/signin.dto';
 import { HashingProvider } from './hashing.provider';
 
@@ -10,7 +13,12 @@ export class SignInProvider {
         @Inject(forwardRef(() => UsersService))
         private readonly usersService: UsersService,
 
-        private readonly hashingProvider: HashingProvider
+        private readonly hashingProvider: HashingProvider,
+
+        private readonly jwtService: JwtService,
+
+        @Inject(jwtConfig.KEY)
+        private readonly jwtConfiguration: ConfigType<typeof jwtConfig>
     ) { }
 
     public async singIn(signInDto: SignInDto) {
@@ -33,10 +41,23 @@ export class SignInProvider {
             throw new UnauthorizedException("Email or password is wrong!")
         }
 
+        // generate token
+        const accessToken = await this.jwtService.signAsync(
+            {
+                sub: user.id,
+                email: user.email
+            },
+            {
+                secret: this.jwtConfiguration.secret,
+                audience: this.jwtConfiguration.audience,
+                issuer: this.jwtConfiguration.issuer,
+                expiresIn: this.jwtConfiguration.accessTokenTTL
+            }
+        )
+
         // send confirmation
         return {
-            message: "User signed in successfully!",
-            success: true
+            accessToken,
         }
     }
 
