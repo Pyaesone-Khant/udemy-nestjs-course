@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationQueryDto } from 'src/common/pagination/dtos/pagination-query.dto';
+import { PaginationProvider } from 'src/common/pagination/providers/pagination.provider';
 import { TagsService } from 'src/tags/providers/tags.service';
 import { UsersService } from 'src/users/providers/users.service';
 import { Repository } from 'typeorm';
@@ -15,18 +16,15 @@ export class PostsService {
         private readonly usersService: UsersService,
         @InjectRepository(Post)
         private readonly postRepository: Repository<Post>,
-        private readonly tagsService: TagsService
+        private readonly tagsService: TagsService,
+        private readonly paginationProvider: PaginationProvider
     ) { }
 
     public async findAll(paginationQueryDto: PaginationQueryDto) {
         let posts = undefined;
-        const { page, limit } = paginationQueryDto;
 
         try {
-            posts = await this.postRepository.find({
-                skip: (page - 1) * limit,
-                take: limit
-            });
+            posts = await this.paginationProvider.paginateQuery(paginationQueryDto, this.postRepository)
         } catch (error) {
             throw new RequestTimeoutException('Request Timeout! Unable to connect to database!')
         }

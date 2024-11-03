@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PaginationModule } from 'src/common/pagination/pagination.module';
 import { TagsModule } from 'src/tags/tags.module';
 import { UsersModule } from 'src/users/users.module';
 import { Post } from './post.entity';
@@ -13,6 +14,7 @@ import { PostsService } from './posts.service';
         UsersModule,
         TagsModule,
         TypeOrmModule.forFeature([Post]),
+        PaginationModule
     ]
 })
 export class PostsModule { }
