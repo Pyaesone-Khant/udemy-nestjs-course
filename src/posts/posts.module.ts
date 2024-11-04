@@ -6,10 +6,12 @@ import { UsersModule } from 'src/users/users.module';
 import { Post } from './post.entity';
 import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
+import { CreatePostProvider } from './providers/create-post.provider';
+import { FindPostBySlugProvider } from './providers/find-post-by-slug.provider';
 
 @Module({
     controllers: [PostsController],
-    providers: [PostsService],
+    providers: [PostsService, CreatePostProvider, FindPostBySlugProvider],
     imports: [
         UsersModule,
         TagsModule,
