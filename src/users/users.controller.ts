@@ -1,5 +1,7 @@
 import { Body, Controller, DefaultValuePipe, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { AuthType } from 'src/auth/enums/auth-type.enum';
 import { CreateManyUsersDto } from './dtos/create-many-users.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { GetUsersParamDto } from './dtos/get-users-param.dto';
@@ -42,6 +44,7 @@ export class UsersController {
     }
 
     @Post()
+    @Auth(AuthType.None) // set the auth type to None & make the endpoint public
     create(@Body() createUserDto: CreateUserDto) {
         return this.usersService.create(createUserDto);
     }
