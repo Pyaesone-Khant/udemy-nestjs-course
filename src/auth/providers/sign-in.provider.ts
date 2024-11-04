@@ -1,10 +1,7 @@
 import { forwardRef, Inject, Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/providers/users.service';
-import jwtConfig from '../config/jwt.config';
 import { SignInDto } from '../dtos/signin.dto';
-import { ActiveUserData } from '../interfaces/active-user-data.interface';
+import { GenerateTokenProvider } from './generate-token.provider';
 import { HashingProvider } from './hashing.provider';
 
 @Injectable()
@@ -16,10 +13,7 @@ export class SignInProvider {
 
         private readonly hashingProvider: HashingProvider,
 
-        private readonly jwtService: JwtService,
-
-        @Inject(jwtConfig.KEY)
-        private readonly jwtConfiguration: ConfigType<typeof jwtConfig>
+        private readonly generateTokenProvider: GenerateTokenProvider
     ) { }
 
     public async singIn(signInDto: SignInDto) {
@@ -43,22 +37,12 @@ export class SignInProvider {
         }
 
         // generate token
-        const accessToken = await this.jwtService.signAsync(
-            {
-                sub: user.id,
-                email: user.email
-            } as ActiveUserData,
-            {
-                secret: this.jwtConfiguration.secret,
-                audience: this.jwtConfiguration.audience,
-                issuer: this.jwtConfiguration.issuer,
-                expiresIn: this.jwtConfiguration.accessTokenTTL
-            }
-        )
+        const { accessToken, refreshToken } = await this.generateTokenProvider.generateToken(user)
 
         // send confirmation
         return {
             accessToken,
+            refreshToken
         }
     }
 
