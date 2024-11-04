@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/providers/users.service';
@@ -18,6 +18,7 @@ export class RefreshTokenProvider {
 
         private readonly generateTokenProvider: GenerateTokenProvider,
 
+        @Inject(forwardRef(() => UsersService))
         private readonly usersService: UsersService,
     ) { }
 
@@ -37,7 +38,7 @@ export class RefreshTokenProvider {
             const user = await this.usersService.findOne(sub)
 
             // generate new access token and refresh token
-            await this.generateTokenProvider.generateToken(user)
+            return await this.generateTokenProvider.generateToken(user)
         } catch (error) {
             throw new UnauthorizedException(error)
         }
