@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import jwtConfig from './auth/config/jwt.config';
 import { AccessTokenGuard } from './auth/guards/access-token/access-token.guard';
+import { AuthenticationGuard } from './auth/guards/authentication/authentication.guard';
 import { PaginationModule } from './common/pagination/pagination.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
@@ -60,10 +61,12 @@ const ENV = process.env.NODE_ENV
     providers: [
         AppService,
         {
-            // applying access-token guard to the whole application
+            // applying authenticaiton guard to the whole application
             provide: APP_GUARD,
-            useClass: AccessTokenGuard
-        }
+            useClass: AuthenticationGuard
+        },
+        // must be provided in the module where it is used to work 'AuthenticationGuard'
+        AccessTokenGuard,
     ],
 })
 export class AppModule { }
