@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
 import { Type } from "class-transformer"
-import { IsArray, IsEnum, IsInt, IsISO8601, IsJSON, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength, ValidateNested } from "class-validator"
+import { IsArray, IsDate, IsEnum, IsInt, IsJSON, IsNotEmpty, IsOptional, IsString, IsUrl, Matches, MaxLength, MinLength, ValidateNested } from "class-validator"
 import { MetaOption } from "src/meta-options/meta-option.entity"
 import { CreatePostMetaOptionDto } from "../../meta-options/dtos/create-post-meta-option.dto"
 import { PostStatus } from "../enums/postStatus.enum"
@@ -76,7 +76,7 @@ export class CreatePostDto {
         example: "2024-03-16T07:46:32+0000"
     })
     @IsOptional()
-    @IsISO8601()
+    @IsDate()
     publishOn?: Date
 
     @ApiPropertyOptional({
