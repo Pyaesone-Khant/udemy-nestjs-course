@@ -18,7 +18,6 @@ async function bootstrap() {
     /**
      * swagger configuration
      */
-
     const config = new DocumentBuilder()
         .setVersion("1.0")
         .setTitle("NestJS Masterclass - Blog App API")

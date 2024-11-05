@@ -14,5 +14,6 @@ export default Joi.object({
     JWT_ACCESS_TOKEN_TTL: Joi.number().required().default(3600),
     JWT_TOKEN_AUDIENCE: Joi.string().required(),
     JWT_TOKEN_ISSUER: Joi.string().required(),
-    JWT_REFRESH_TOKEN_TTL: Joi.number().required().default(86400)
+    JWT_REFRESH_TOKEN_TTL: Joi.number().required().default(86400),
+    API_VERSION: Joi.string().required(),
 })
