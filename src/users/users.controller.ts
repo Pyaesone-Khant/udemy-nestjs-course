@@ -1,4 +1,4 @@
-import { Body, Controller, DefaultValuePipe, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, DefaultValuePipe, Get, Param, Post, Query, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { AuthType } from 'src/auth/enums/auth-type.enum';
@@ -45,6 +45,7 @@ export class UsersController {
 
     @Post()
     @Auth(AuthType.None) // set the auth type to None & make the endpoint public
+    @UseInterceptors(ClassSerializerInterceptor)
     create(@Body() createUserDto: CreateUserDto) {
         return this.usersService.create(createUserDto);
     }
