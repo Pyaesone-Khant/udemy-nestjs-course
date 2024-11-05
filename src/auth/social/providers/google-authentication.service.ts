@@ -1,10 +1,9 @@
-import { forwardRef, Inject, Injectable, OnModuleInit, RequestTimeoutException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import jwtConfig from 'src/auth/config/jwt.config';
 import { GenerateTokenProvider } from 'src/auth/providers/generate-token.provider';
 import { UsersService } from 'src/users/providers/users.service';
-import { User } from 'src/users/user.entity';
 import { GoogleTokenDto } from '../dtos/google-token.dto';
 
 
@@ -32,28 +31,34 @@ export class GoogleAuthenticationService implements OnModuleInit {
     }
 
     public async authenticate(googleTokenDto: GoogleTokenDto) {
-        let user: User | undefined = undefined;
-
-        // verify the google token sent by the user
-        const ticket = await this.oAuthClient.verifyIdToken({
-            idToken: googleTokenDto.token,
-        });
-
-        const { email, sub: googleId, given_name: firstName, family_name: lastName } = ticket.getPayload();
-
-        // Find a user by googleId
         try {
-            user = await this.usersService.findOneByGoogleId(googleId)
+            // verify the google token sent by the user
+            const ticket = await this.oAuthClient.verifyIdToken({
+                idToken: googleTokenDto.token,
+            });
+
+            const { email, sub: googleId, given_name: firstName, family_name: lastName } = ticket.getPayload();
+
+            // Find a user by googleId
+            const user = await this.usersService.findOneByGoogleId(googleId)
+
+            // If the user exist, generate tokens & return them
+            if (user) {
+                return this.generateTokenProvider.generateToken(user)
+            }
+
+            // Create a new user
+            const newUser = await this.usersService.createGoogleUser({
+                firstName,
+                lastName,
+                email,
+                googleId
+            })
+
+            return this.generateTokenProvider.generateToken(newUser);
         } catch (error) {
-            throw new RequestTimeoutException(error)
+            throw new UnauthorizedException(error)
         }
-
-        // If the user exist, generate tokens & return them
-        if (user) {
-            return this.generateTokenProvider.generateToken(user)
-        }
-
-        // Create a new user
 
     }
 
