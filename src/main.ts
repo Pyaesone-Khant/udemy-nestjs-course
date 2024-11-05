@@ -13,6 +13,7 @@ async function bootstrap() {
             enableImplicitConversion: true //implicitly converting types
         }
     }));
+    app.enableCors(); //enable cors for all routes
 
     /**
      * swagger configuration
