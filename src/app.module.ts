@@ -18,6 +18,7 @@ import { MetaOptionsModule } from './meta-options/meta-options.module';
 import { PostsModule } from './posts/posts.module';
 import { TagsModule } from './tags/tags.module';
 import { UsersModule } from './users/users.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 const ENV = process.env.NODE_ENV
 
@@ -56,7 +57,8 @@ const ENV = process.env.NODE_ENV
         MetaOptionsModule,
         PaginationModule,
         ConfigModule.forFeature(jwtConfig),
-        JwtModule.registerAsync(jwtConfig.asProvider())
+        JwtModule.registerAsync(jwtConfig.asProvider()),
+        UploadsModule
     ],
     controllers: [AppController],
     providers: [
