@@ -19,6 +19,7 @@ import { PostsModule } from './posts/posts.module';
 import { TagsModule } from './tags/tags.module';
 import { UsersModule } from './users/users.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { MailModule } from './mail/mail.module';
 
 const ENV = process.env.NODE_ENV
 
@@ -58,7 +59,8 @@ const ENV = process.env.NODE_ENV
         PaginationModule,
         ConfigModule.forFeature(jwtConfig),
         JwtModule.registerAsync(jwtConfig.asProvider()),
-        UploadsModule
+        UploadsModule,
+        MailModule
     ],
     controllers: [AppController],
     providers: [

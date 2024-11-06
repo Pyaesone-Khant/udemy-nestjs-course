@@ -8,4 +8,7 @@ export default registerAs('appConfig', () => ({
     awsRegion: process.env.AWS_REGION,
     awsBucketName: process.env.AWS_BUCKET_NAME,
     awsBucketUrl: process.env.AWS_BUCKET_URL,
+    mailHost: process.env.MAIL_HOST,
+    smtpUsername: process.env.SMTP_USERNAME,
+    smtpPassword: process.env.SMTP_PASSWORD,
 }))
