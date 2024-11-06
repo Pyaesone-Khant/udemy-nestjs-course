@@ -1,1 +1,43 @@
-<p>Welcome Email!</p>
+<p
+    style="font-family: Arial, Helvetica, sans-serif; 
+    font-size: 16px; 
+    color: #333;"
+>
+    Dear <%= firstname %>,
+</p>
+<p
+    style="font-family: Arial, Helvetica, sans-serif; 
+    font-size: 16px; 
+    color: #333;"
+>
+    Thanks for signing up for Udemy NestJS Course. We are excited to have you on board.
+</p>
+
+<p 
+    style="font-family: Arial, Helvetica, sans-serif; 
+    font-size: 16px; 
+    color: #333;"
+>
+    Please check your account details here:
+</p>
+<ul
+    style="font-family: Arial, Helvetica, sans-serif; 
+    font-size: 16px; 
+    color: #333;
+    padding-left: 20px;"
+>
+    <li style="color: #555;">
+        <strong>Name:</strong> <%= firstname %> <%= lastname %>
+    </li>
+    <li style="color: #555;">
+        <strong>Email:</strong> <%= email %>
+    </li>
+    <li style="color: #555;">
+        <strong>Login URL:</strong> <%= loginUrl %>
+    </li>
+</ul>
+
+<p style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; columns: #333;">
+    Thanks<br/>
+    Udemy NestJS Course Team
+</p>

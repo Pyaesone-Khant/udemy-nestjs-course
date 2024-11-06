@@ -1,6 +1,7 @@
 import { BadRequestException, forwardRef, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HashingProvider } from 'src/auth/providers/hashing.provider';
+import { MailService } from 'src/mail/providers/mail.service';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { User } from '../user.entity';
@@ -12,7 +13,12 @@ export class CreateUserProvider {
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
         @Inject(forwardRef(() => HashingProvider))
-        private readonly hashingProvider: HashingProvider
+        private readonly hashingProvider: HashingProvider,
+
+        /**
+        * Inject mailService **since MailModule is marked as Global Module, there is no need to import MailService specifically in each module.**
+        */
+        private readonly mailService: MailService,
     ) { }
 
     /**
@@ -59,6 +65,12 @@ export class CreateUserProvider {
                     description: 'Error connecting to database!'
                 }
             )
+        }
+
+        try {
+            await this.mailService.sendWelcomeMail(newUser)
+        } catch (error) {
+            throw new RequestTimeoutException(error)
         }
 
         return newUser;
