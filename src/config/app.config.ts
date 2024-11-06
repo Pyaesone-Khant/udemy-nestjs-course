@@ -7,4 +7,5 @@ export default registerAs('appConfig', () => ({
     awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     awsRegion: process.env.AWS_REGION,
     awsBucketName: process.env.AWS_BUCKET_NAME,
+    awsBucketUrl: process.env.AWS_BUCKET_URL,
 }))
