@@ -1,3 +1,4 @@
+import { BadRequestException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { HashingProvider } from "src/auth/providers/hashing.provider";
@@ -18,14 +19,31 @@ describe('CreateUserProvider', () => {
     let provider: CreateUserProvider;
     let userRepository: MockRepository<User>;
 
+    const user = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@doe.com',
+        password: 'Asdfghjkl!1',
+    }
+
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CreateUserProvider,
                 { provide: DataSource, useValue: {} },
                 { provide: getRepositoryToken(User), useValue: createMockRepository() },
-                { provide: HashingProvider, useValue: {} },
-                { provide: MailService, useValue: {} },
+                {
+                    provide: HashingProvider,
+                    useValue: {
+                        hashPassword: jest.fn(() => user.password)
+                    }
+                },
+                {
+                    provide: MailService,
+                    useValue: {
+                        sendWelcomeMail: jest.fn(() => Promise.resolve())
+                    }
+                },
             ]
         }).compile();
 
@@ -42,5 +60,31 @@ describe('CreateUserProvider', () => {
         it('should be defined', () => {
             expect(provider.create).toBeDefined();
         });
+
+        describe('when user does not exist in database', () => {
+            it('should create a user', async () => {
+                userRepository.findOne.mockReturnValue(null);
+                userRepository.create.mockReturnValue(user);
+                userRepository.save.mockReturnValue(user);
+                const newUser = await provider.create(user);
+                expect(userRepository.findOne).toHaveBeenCalledWith({ where: { email: user.email } });
+                expect(userRepository.create).toHaveBeenCalledWith(user);
+                expect(userRepository.save).toHaveBeenCalledWith(user);
+            })
+        })
+
+        describe('when user exists in database', () => {
+            it('should throw an error', async () => {
+                userRepository.findOne.mockReturnValue(user.email);
+                userRepository.create.mockReturnValue(user);
+                userRepository.save.mockReturnValue(user);
+                try {
+                    const newUser = await provider.create(user);
+                } catch (error) {
+                    expect(error).toBeInstanceOf(BadRequestException);
+                }
+            })
+        })
     })
+
 })
