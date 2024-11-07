@@ -11,7 +11,7 @@ export async function dropDatabase(config: ConfigService): Promise<void> {
         password: config.get('database.password'),
         database: config.get('database.name'),
         synchronize: config.get('database.synchronize'),
-    })
+    }).initialize();
     // drop all the tables in the database
     await AppDataSource.dropDatabase();
 
