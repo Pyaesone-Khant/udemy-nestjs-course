@@ -49,5 +49,5 @@ export class User {
         () => Post,
         (post) => post.author,
     )
-    posts: Post[]
+    posts?: Post[]
 }

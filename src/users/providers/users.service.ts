@@ -1,6 +1,5 @@
-import { BadRequestException, forwardRef, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
+import { BadRequestException, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthService } from 'src/auth/providers/auth.service';
 import { Repository } from 'typeorm';
 import { CreateManyUsersDto } from '../dtos/create-many-users.dto';
 import { CreateUserDto } from '../dtos/create-user.dto';
@@ -22,8 +21,9 @@ export class UsersService {
      * Constructor to inject the services.
      */
     constructor(
-        @Inject(forwardRef(() => AuthService))
-        private readonly authService: AuthService,
+        /**
+         * Inject the user repository to perform CRUD operations on the users table.
+         */
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
 
