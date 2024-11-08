@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
+import { User } from "src/users/user.schema";
 import { PostStatus } from "./enums/post-status.enum";
 import { PostType } from "./enums/post-type.enum";
 
@@ -51,6 +52,12 @@ export class Post extends Document {
         isRequired: false
     })
     publishOn?: Date
+
+    @Prop({
+        type: mongoose.Schema.Types.ObjectId,
+        ref: User.name
+    })
+    author: User
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

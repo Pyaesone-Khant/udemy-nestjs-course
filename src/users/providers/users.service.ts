@@ -45,4 +45,16 @@ export class UsersService {
 
         return newUser;
     }
+
+    public async findOne(userId: string) {
+        let user: User | undefined;
+
+        try {
+            user = await this.userModel.findById(userId).exec();
+        } catch (error) {
+            throw new RequestTimeoutException(error)
+        }
+
+        return user;
+    }
 }
