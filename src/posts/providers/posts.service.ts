@@ -19,7 +19,10 @@ export class PostsService {
         let posts: Post[] | undefined = undefined;
 
         try {
-            posts = await this.postModel.find().exec();
+            posts = await this.postModel.find().populate([
+                'author',
+                'tags'
+            ]).exec();
         } catch (error) {
             throw new RequestTimeoutException(error)
         }

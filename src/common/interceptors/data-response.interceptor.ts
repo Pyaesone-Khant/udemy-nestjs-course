@@ -15,13 +15,18 @@ export class DataResponseInterceptor implements NestInterceptor {
         next: CallHandler): Observable<any> {
         return next.handle().pipe(map(data => ({
             apiVersion: this.configService.get("appConfig.apiVersion"),
-            data: this.transformResponse(data)
+            data: data
         })));
     }
 
     private transformResponse(data: any): Document | Document[] {
         if (Array.isArray(data)) {
-            return data.map((item: any) => this.removeAttributes(item));
+            return data.map((item: any) => {
+                if (item && typeof item === 'object') {
+                    return this.removeAttributes(item);
+                }
+                return item;
+            });
         }
         return this.removeAttributes(data);
     }

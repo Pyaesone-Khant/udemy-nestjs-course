@@ -10,6 +10,7 @@ import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
+import { TagsModule } from './tags/tags.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -33,7 +34,8 @@ const ENV = process.env.NODE_ENV;
                 dbName: config.get('database.mongoDBName'),
             }),
             inject: [ConfigService]
-        })
+        }),
+        TagsModule
     ],
     controllers: [AppController],
     providers: [
